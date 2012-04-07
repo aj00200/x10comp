@@ -13,8 +13,9 @@ def main():
         
     filename = sys.argv[-1]
         
-    parser = parser.cparse.Parser(filename)
-    converter = converters.c2x10c.Converter()
+    parser = parsers.cparse.Parser(filename)
+    converter = converters.c2x10c.Converter(parser)
+    converter.convert()
     
 if __name__ == '__main__':
     main()

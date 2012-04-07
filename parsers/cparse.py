@@ -15,6 +15,9 @@ class Parser():
         self.parser = pycparser.CParser()
         self.ast = self.parser.parse(self.code, filename)
         
+    def children(self):
+        return self.ast.children()
+        
     def get_compound(self):
         '''Get the Compound section of the pycparser output.'''
         return self.ast.children()[0][1].children()[1][1]
