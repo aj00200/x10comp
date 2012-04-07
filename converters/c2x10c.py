@@ -29,7 +29,7 @@ class Converter(converters.base.Converter):
         reaced. Work backwards, calling cfunc2asm at each level from
         the bottom to top.
         '''
-        block_stack = []
+        block_stack = [] # Contains Block objects
         
     def cfunc2asm(self, function):
         '''Take a pycparser function as input and output the 0x10c asm.'''
@@ -46,14 +46,16 @@ class Converter(converters.base.Converter):
     def cinstr2asm(self, instruction):
         '''Convert a single instruction to asm.'''
         if isinstance(instruction, pycparser.c_ast.Assignment):
-            pass # SET a,b
+            # TODO: stop assuming that the variable name is a register/address
+            params = instruction.children()
+            return 'SET %s,%s' % (params[0][1].name, params[1][1].value)
         elif isinstance(instruction, pycparser.c_ast.BinaryOp):
             pass # AND, BOR, XOR, IFE, IFN, IFG, IFB
             
         elif isinstance(instruction, pycparser.c_ast.Constant):
             return instruction.value
         
-class Subroutine():
+class Subroutine(object):
     def __init__(self, name, body):
         self.name = name
         self.body = body
@@ -61,3 +63,8 @@ class Subroutine():
     def format(self):
         '''Return asm formatted code.'''
         pass
+        
+class Block(object):
+    def __init__(self, block):
+        self.block = block
+        self.index = 0
