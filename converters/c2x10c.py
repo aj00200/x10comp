@@ -32,7 +32,9 @@ class Converter(converters.base.Converter):
         block_stack = [] # Contains Block objects
         
     def cfunc2asm(self, function):
-        '''Take a pycparser function as input and output the 0x10c asm.'''
+        '''Take a pycparser function as input and output the 0x10c asm.
+        Call cinstr_dig on each function to convert it to asm.
+        '''
         print(' [*] Inside function:')
         funcbody = function.children()[1][1]
         funcbody_instructions = funcbody.children()
@@ -44,7 +46,9 @@ class Converter(converters.base.Converter):
             print(self.cinstr2asm(instr))
                 
     def cinstr2asm(self, instruction):
-        '''Convert a single instruction to asm.'''
+        '''Convert a single instruction to asm. This method is called by
+        cinstr_dig for every operation in the C code.
+        '''
         if isinstance(instruction, pycparser.c_ast.Assignment):
             # TODO: stop assuming that the variable name is a register/address
             params = instruction.children()
@@ -56,6 +60,7 @@ class Converter(converters.base.Converter):
             return instruction.value
         
 class Subroutine(object):
+    '''Hold asm code and output it with the subroutine name.'''
     def __init__(self, name, body):
         self.name = name
         self.body = body
