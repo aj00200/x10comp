@@ -20,5 +20,6 @@ class Parser():
         
     def get_compound(self):
         '''Get the Compound section of the pycparser output.'''
+        # WARNING: this code has not been tested!!!
         return self.ast.children()[0][1].children()[1][1]
         

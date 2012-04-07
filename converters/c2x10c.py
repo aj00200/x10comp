@@ -24,6 +24,13 @@ class Converter(converters.base.Converter):
             
         # TODO: add a call to the main subroutine
         
+    def cinstr_dig(self):
+        '''Recursively search through the AST until the bottom is
+        reaced. Work backwards, calling cfunc2asm at each level from
+        the bottom to top.
+        '''
+        block_stack = []
+        
     def cfunc2asm(self, function):
         '''Take a pycparser function as input and output the 0x10c asm.'''
         print(' [*] Inside function:')
@@ -33,13 +40,18 @@ class Converter(converters.base.Converter):
         
         for instruction in funcbody_instructions:
             instr = instruction[1]
-            # print(instr)
-            if isinstance(instr, pycparser.c_ast.Return):
-                print('  [*] Got return instruction')
+            instr.show()
+            print(self.cinstr2asm(instr))
                 
     def cinstr2asm(self, instruction):
         '''Convert a single instruction to asm.'''
-        pass
+        if isinstance(instruction, pycparser.c_ast.Assignment):
+            pass # SET a,b
+        elif isinstance(instruction, pycparser.c_ast.BinaryOp):
+            pass # AND, BOR, XOR, IFE, IFN, IFG, IFB
+            
+        elif isinstance(instruction, pycparser.c_ast.Constant):
+            return instruction.value
         
 class Subroutine():
     def __init__(self, name, body):

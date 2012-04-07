@@ -1,6 +1,6 @@
 #! /usr/bin/env python
-# Code Copyright (c) 2012 <aj00200@aj00200.org>
-# Want it under a free license? Just ask!!!
+# Copyright 2012 Aj00200 <aj00200@aj00200.org>
+# Licensed under the GNU GPL v3
 
 import sys
 import parsers.cparse
