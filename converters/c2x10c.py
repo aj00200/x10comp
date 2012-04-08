@@ -61,9 +61,10 @@ class Converter(converters.base.Converter):
         cinstr_dig for every operation in the C code.
         '''
         if isinstance(instruction, pycparser.c_ast.Assignment):
-            # TODO: stop assuming that the variable name is a register/address
-            params = instruction.children()
-            return 'SET %s,%s' % (params[0][1].name, params[1][1].value)
+            a = self.cinstr2asm(instruction.children()[0][1])
+            b = self.cinstr2asm(instruction.children()[1][1])
+            print 'SET %s,%s' % (a, b)
+            return 'SET %s,%s' % (a, b)
         
         elif isinstance(instruction, pycparser.c_ast.BinaryOp):
             pass # AND, BOR, XOR, IFE, IFN, IFG, IFB
@@ -87,8 +88,9 @@ class Converter(converters.base.Converter):
                                   instruction.names)
 
         elif isinstance(instruction, pycparser.c_ast.TypeDecl):
-            self.next_free_ram += 0x0001 # TODO: use actual memory size
-            return self.next_free_ram - 0x0001
+            mem_size = self.cinstr2asm(instruction.children()[0][1])
+            self.next_free_ram += hex(mem_size)
+            return self.next_free_ram - mem_size
             
         elif isinstance(instruction, pycparser.c_ast.Constant):
             return instruction.value
