@@ -3,13 +3,22 @@ import converters.base
 
 class Converter(converters.base.Converter):
     '''Convert the code accessed through the parser object into asm.'''
-    MAX_RAM = hex(0xffff)
     
-    def __init__(self, parser):
+    def __init__(self, parser, config = {}):
         super(Converter, self).__init__(parser)
+        
+        # Setup "constants"
+        self.RAM_SIZE = 0xffff      # Stack starts at 0xffff
+        self.MAX_STACK_SIZE = 0x60  # Stack has this much space
+        
+        if 'MAX_STACK_SIZE' in config:
+            self.MAX_STACK_SIZE = config['MAX_STACK_SIZE']
+        
+        # Setup variables
+        self.next_variable = self.RAM_SIZE - self.MAX_STACK_SIZE # Heap start
+        
         self.subroutines = {}
         self.variables = {}
-        self.next_free_ram = 0
     
     def convert(self):
         '''Convert functions to asm subroutines and store them in a
@@ -65,7 +74,7 @@ class Converter(converters.base.Converter):
             return 'SET %s,%s' % (a, b)
         
         elif isinstance(instruction, pycparser.c_ast.BinaryOp):
-            pass # AND, BOR, XOR, IFE, IFN, IFG, IFB
+            pass # AND, BOR, XOR, IFE, IFN, IFG, IFB, ADD
             
         elif isinstance(instruction, pycparser.c_ast.Constant):
             if instruction.type == 'int':
@@ -94,10 +103,10 @@ class Converter(converters.base.Converter):
                                   instruction.names)
 
         elif isinstance(instruction, pycparser.c_ast.TypeDecl):
-            mem_addr = hex(self.next_free_ram)
+            mem_addr = hex(self.next_variable)
             self.variables[instruction.declname] = mem_addr
             mem_size = self.cinstr2asm(instruction.children()[0][1])
-            self.next_free_ram += mem_size
+            self.next_variable -= mem_size
             return mem_addr
             
         elif isinstance(instruction, pycparser.c_ast.Constant):
