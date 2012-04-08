@@ -3,9 +3,13 @@ import converters.base
 
 class Converter(converters.base.Converter):
     '''Convert the code accessed through the parser object into asm.'''
+    MAX_RAM = 0xFFFF
+    
     def __init__(self, parser):
         super(Converter, self).__init__(parser)
         self.subroutines = {}
+        self.variables = {}
+        self.next_free_ram = 0x0000
     
     def convert(self):
         '''Convert functions to asm subroutines and store them in a
@@ -43,7 +47,7 @@ class Converter(converters.base.Converter):
         
         for instruction in funcbody_instructions:
             instr = instruction[1]
-            # Check if we will need to set the PC
+            # Check if we will need to handle the loop somehow
             if isinstance(instr, pycparser.c_ast.While):
                 pass
             elif isinstance(instr, pycparser.c_ast.For):
@@ -60,8 +64,31 @@ class Converter(converters.base.Converter):
             # TODO: stop assuming that the variable name is a register/address
             params = instruction.children()
             return 'SET %s,%s' % (params[0][1].name, params[1][1].value)
+        
         elif isinstance(instruction, pycparser.c_ast.BinaryOp):
             pass # AND, BOR, XOR, IFE, IFN, IFG, IFB
+            
+        elif isinstance(instruction, pycparser.c_ast.Constant):
+            if instruction.type == 'int':
+                return hex(int(instruction.value))
+            elif instruction.type == 'float':
+                raise UnsupportedCode('Float values are not supported yet.')
+            
+        elif isinstance(instruction, pycparser.c_ast.Decl):
+            pass
+
+        elif isinstance(instruction, pycparser.c_ast.IdentifierType):
+            if instruction.names == ['char']:
+                return 1
+            if instruction.names == ['float']:
+                raise UnsupportedCode('Float values are not supported yet.')
+            
+            raise UnsupportedCode('Unknown memory size for data type: %s' %
+                                  instruction.names)
+
+        elif isinstance(instruction, pycparser.c_ast.TypeDecl):
+            self.next_free_ram += 0x0001 # TODO: use actual memory size
+            return self.next_free_ram - 0x0001
             
         elif isinstance(instruction, pycparser.c_ast.Constant):
             return instruction.value
@@ -80,3 +107,8 @@ class Block(object):
     def __init__(self, block):
         self.block = block
         self.index = 0
+        self.total_blocks = len(block.children())
+        
+        
+class UnsupportedCode(Exception):
+    pass
