@@ -34,6 +34,7 @@ class Converter(converters.base.Converter):
     def cfunc2asm(self, function):
         '''Take a pycparser function as input and output the 0x10c asm.
         Call cinstr_dig on each function to convert it to asm.
+        TODO: pass loops and if statements back to this function.
         '''
         print(' [*] Inside function:')
         funcbody = function.children()[1][1]
@@ -42,6 +43,12 @@ class Converter(converters.base.Converter):
         
         for instruction in funcbody_instructions:
             instr = instruction[1]
+            # Check if we will need to set the PC
+            if isinstance(instr, pycparser.c_ast.While):
+                pass
+            elif isinstance(instr, pycparser.c_ast.For):
+                pass
+                
             instr.show()
             print(self.cinstr2asm(instr))
                 
