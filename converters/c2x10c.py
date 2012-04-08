@@ -3,13 +3,13 @@ import converters.base
 
 class Converter(converters.base.Converter):
     '''Convert the code accessed through the parser object into asm.'''
-    MAX_RAM = 0xFFFF
+    MAX_RAM = hex(0xffff)
     
     def __init__(self, parser):
         super(Converter, self).__init__(parser)
         self.subroutines = {}
         self.variables = {}
-        self.next_free_ram = 0x0000
+        self.next_free_ram = 0
     
     def convert(self):
         '''Convert functions to asm subroutines and store them in a
@@ -43,7 +43,6 @@ class Converter(converters.base.Converter):
         print(' [*] Inside function:')
         funcbody = function.children()[1][1]
         funcbody_instructions = funcbody.children()
-        funcbody.show()
         
         for instruction in funcbody_instructions:
             instr = instruction[1]
@@ -53,17 +52,16 @@ class Converter(converters.base.Converter):
             elif isinstance(instr, pycparser.c_ast.For):
                 pass
                 
-            instr.show()
             print(self.cinstr2asm(instr))
                 
     def cinstr2asm(self, instruction):
         '''Convert a single instruction to asm. This method is called by
         cinstr_dig for every operation in the C code.
         '''
+        #instruction.show()
         if isinstance(instruction, pycparser.c_ast.Assignment):
             a = self.cinstr2asm(instruction.children()[0][1])
             b = self.cinstr2asm(instruction.children()[1][1])
-            print 'SET %s,%s' % (a, b)
             return 'SET %s,%s' % (a, b)
         
         elif isinstance(instruction, pycparser.c_ast.BinaryOp):
@@ -76,12 +74,16 @@ class Converter(converters.base.Converter):
                 raise UnsupportedCode('Float values are not supported yet.')
             
         elif isinstance(instruction, pycparser.c_ast.Decl):
-            pass
+            a = self.cinstr2asm(instruction.children()[0][1])
+            b = self.cinstr2asm(instruction.children()[1][1])
+            return 'SET %s,%s' % (a, b)
 
         elif isinstance(instruction, pycparser.c_ast.IdentifierType):
+            if instruction.names == ['int']:
+                return 1
             if instruction.names == ['char']:
                 return 1
-            if instruction.names == ['float']:
+            elif instruction.names == ['float']:
                 raise UnsupportedCode('Float values are not supported yet.')
             
             raise UnsupportedCode('Unknown memory size for data type: %s' %
@@ -89,8 +91,8 @@ class Converter(converters.base.Converter):
 
         elif isinstance(instruction, pycparser.c_ast.TypeDecl):
             mem_size = self.cinstr2asm(instruction.children()[0][1])
-            self.next_free_ram += hex(mem_size)
-            return self.next_free_ram - mem_size
+            self.next_free_ram += mem_size
+            return hex(self.next_free_ram - mem_size)
             
         elif isinstance(instruction, pycparser.c_ast.Constant):
             return instruction.value
