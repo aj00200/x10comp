@@ -1,5 +1,6 @@
 import pycparser
 import converters.base
+from libs import ASMAst
 
 class Converter(converters.base.Converter):
     '''Convert the code accessed through the parser object into asm.'''
@@ -71,7 +72,7 @@ class Converter(converters.base.Converter):
         if isinstance(instruction, pycparser.c_ast.Assignment):
             a = self.cinstr2asm(instruction.children()[0][1])
             b = self.cinstr2asm(instruction.children()[1][1])
-            return 'SET %s,%s' % (a, b)
+            return ASMAst.ASMSet(a, b)
         
         elif isinstance(instruction, pycparser.c_ast.BinaryOp):
             pass # AND, BOR, XOR, IFE, IFN, IFG, IFB, ADD
@@ -85,7 +86,7 @@ class Converter(converters.base.Converter):
         elif isinstance(instruction, pycparser.c_ast.Decl):
             a = self.cinstr2asm(instruction.children()[0][1])
             b = self.cinstr2asm(instruction.children()[1][1])
-            return 'SET %s,%s' % (a, b)
+            return ASMAst.ASMSet(a, b)
         
         elif isinstance(instruction, pycparser.c_ast.ID):
             if instruction.name in self.variables:
