@@ -8,7 +8,7 @@ class ASMObject(object):
         self.arg1 = arg1
         self.arg2 = arg2
 
-    def toASM(self):
+    def to_ASM(self):
         return "{0} {1}, {2}".format(self.instruction, self.arg1, self.arg2)
 
     def __str__(self):
@@ -101,10 +101,10 @@ class ASMFunction(ASMObject):
         self.name = name
         self.children = []
 
-    def addChild(self, child):
+    def add_child(self, child):
         self.children.append(child)
 
-    def toASM(self):
+    def to_ASM(self):
         asm = ":"
         asm += self.name
         asm += "\n"
