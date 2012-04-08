@@ -77,6 +77,10 @@ class Converter(converters.base.Converter):
             a = self.cinstr2asm(instruction.children()[0][1])
             b = self.cinstr2asm(instruction.children()[1][1])
             return 'SET %s,%s' % (a, b)
+        
+        elif isinstance(instruction, pycparser.c_ast.ID):
+            if instruction.name in self.variables:
+                return self.variables[instruction.name]
 
         elif isinstance(instruction, pycparser.c_ast.IdentifierType):
             if instruction.names == ['int']:
@@ -90,9 +94,11 @@ class Converter(converters.base.Converter):
                                   instruction.names)
 
         elif isinstance(instruction, pycparser.c_ast.TypeDecl):
+            mem_addr = hex(self.next_free_ram)
+            self.variables[instruction.declname] = mem_addr
             mem_size = self.cinstr2asm(instruction.children()[0][1])
             self.next_free_ram += mem_size
-            return hex(self.next_free_ram - mem_size)
+            return mem_addr
             
         elif isinstance(instruction, pycparser.c_ast.Constant):
             return instruction.value
