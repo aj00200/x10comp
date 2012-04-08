@@ -12,7 +12,7 @@ class ASMObject(object):
         return "{0} {1}, {2}".format(self.instruction, self.arg1, self.arg2)
 
     def __str__(self):
-        return str(self.toASM())
+        return str(self.to_ASM())
 
     def __repr__(self):
         return repr(str(self))
@@ -110,7 +110,7 @@ class ASMFunction(ASMObject):
         asm += "\n"
 
         for child in self.children:
-            asm += "\t{0}\n".format(child.toASM())
+            asm += "\t{0}\n".format(child.to_ASM())
 
         return asm
 
@@ -118,9 +118,9 @@ if __name__ == "__main__":
 
     Set = ASMSet("a", "0x10")
     func = ASMFunction("test")
-    func.addChild(Set)
-    func.addChild(Set)
-    func.addChild(Set)
-    func.addChild(Set)
+    func.add_child(Set)
+    func.add_child(Set)
+    func.add_child(Set)
+    func.add_child(Set)
 
     print func
